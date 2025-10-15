@@ -14,7 +14,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        os: [ ubuntu-20.04, macos-11, windows-2019 ]
+        os: [ ubuntu-20.04, macos-11 ]
         node: [ 18 ]
     runs-on: ${{matrix.os}}
     steps:
@@ -42,15 +42,8 @@ jobs:
           working-directory: ./test/window-integration-tests
           run: npm cit
       - name: Publish snapshot release
-        if: ${{matrix.os == 'ubuntu-20.04' || matrix.os == 'macos-11'}}
         run: ./.build/pre-release.sh
         shell: bash
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Publish Windows snapshot release
-        if: ${{matrix.os == 'windows-2019'}}
-        run: ./.build/pre-release.ps1
-        shell: powershell
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
