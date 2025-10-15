@@ -112,3 +112,31 @@ void scrollMouse(int x, int y)
 
 	XSync(display, false);
 }
+
+/* Display-aware mouse functions (thread-safe) */
+
+void moveMouseOnDisplay(MMPoint point, const char *displayName)
+{
+	Display *display = XOpenDisplayByName(displayName);
+	if (display == NULL) return;
+
+	XWarpPointer(display, None, DefaultRootWindow(display), 0, 0, 0, 0, point.x, point.y);
+	XSync(display, false);
+	XCloseDisplay(display);
+}
+
+void toggleMouseOnDisplay(bool down, MMMouseButton button, const char *displayName)
+{
+	Display *display = XOpenDisplayByName(displayName);
+	if (display == NULL) return;
+
+	XTestFakeButtonEvent(display, button, down ? True : False, CurrentTime);
+	XSync(display, false);
+	XCloseDisplay(display);
+}
+
+void clickMouseOnDisplay(MMMouseButton button, const char *displayName)
+{
+	toggleMouseOnDisplay(true, button, displayName);
+	toggleMouseOnDisplay(false, button, displayName);
+}

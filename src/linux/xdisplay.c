@@ -49,3 +49,8 @@ void setXDisplay(const char *name)
 	displayName = strdup(name);
 	hasDisplayNameChanged = 1;
 }
+
+Display *XOpenDisplayByName(const char *displayName)
+{
+	return XOpenDisplay(displayName);
+}

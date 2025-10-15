@@ -84,6 +84,13 @@ void doubleClick(MMMouseButton button);
  * TODO: Add a smoothly scroll mouse next. */
 void scrollMouse(int x, int y);
 
+/* Display-aware mouse functions (thread-safe, Linux only) */
+#if defined(USE_X11)
+void moveMouseOnDisplay(MMPoint point, const char *displayName);
+void toggleMouseOnDisplay(bool down, MMMouseButton button, const char *displayName);
+void clickMouseOnDisplay(MMMouseButton button, const char *displayName);
+#endif
+
 #endif /* MOUSE_H */
 
 #ifdef __cplusplus

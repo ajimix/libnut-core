@@ -14,6 +14,10 @@ Display *XGetMainDisplay(void);
 /* Closes the main display if it is open, or does nothing if not. */
 void XCloseMainDisplay(void);
 
+/* Opens a display by name for one-time use (caller must close with XCloseDisplay)
+ * This is thread-safe as it doesn't use global state. */
+Display *XOpenDisplayByName(const char *displayName);
+
 #ifdef __cplusplus
 extern "C"
 {

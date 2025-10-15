@@ -203,6 +203,86 @@ Napi::Number _scrollMouse(const Napi::CallbackInfo &info) {
     return Napi::Number::New(env, 1);
 }
 
+/* Display-aware mouse functions */
+#if defined(USE_X11)
+Napi::Number _moveMouseOnDisplay(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 3) {
+        throw Napi::Error::New(env, "Invalid number of arguments. Expected x, y, displayName");
+    }
+
+    size_t x = info[0].As<Napi::Number>().Int32Value();
+    size_t y = info[1].As<Napi::Number>().Int32Value();
+    std::string displayName = info[2].As<Napi::String>();
+
+    MMPoint point = MMPointMake(x, y);
+    moveMouseOnDisplay(point, displayName.c_str());
+
+    return Napi::Number::New(env, 1);
+}
+
+Napi::Number _toggleMouseOnDisplay(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 3) {
+        throw Napi::Error::New(env, "Invalid number of arguments. Expected down/up, button, displayName");
+    }
+
+    MMMouseButton button = LEFT_BUTTON;
+    bool down = false;
+
+    std::string directionString = info[0].As<Napi::String>();
+    if (directionString.compare("down") == 0) {
+        down = true;
+    } else if (directionString.compare("up") == 0) {
+        down = false;
+    } else {
+        throw Napi::Error::New(env, "Invalid mouse button state specified.");
+    }
+
+    std::string buttonString = info[1].As<Napi::String>();
+    switch (CheckMouseButton(buttonString, &button)) {
+        case -1:
+            throw Napi::Error::New(env, "Null pointer in mouse button code.");
+            break;
+        case -2:
+            throw Napi::Error::New(env, "Invalid mouse button specified.");
+            break;
+    }
+
+    std::string displayName = info[2].As<Napi::String>();
+    toggleMouseOnDisplay(down, button, displayName.c_str());
+
+    return Napi::Number::New(env, 1);
+}
+
+Napi::Number _clickMouseOnDisplay(const Napi::CallbackInfo &info) {
+    Napi::Env env = info.Env();
+
+    if (info.Length() != 2) {
+        throw Napi::Error::New(env, "Invalid number of arguments. Expected button, displayName");
+    }
+
+    MMMouseButton button = LEFT_BUTTON;
+    std::string buttonString = info[0].As<Napi::String>();
+
+    switch (CheckMouseButton(buttonString, &button)) {
+        case -1:
+            throw Napi::Error::New(env, "Null pointer in mouse button code.");
+            break;
+        case -2:
+            throw Napi::Error::New(env, "Invalid mouse button specified.");
+            break;
+    }
+
+    std::string displayName = info[1].As<Napi::String>();
+    clickMouseOnDisplay(button, displayName.c_str());
+
+    return Napi::Number::New(env, 1);
+}
+#endif
+
 /*
  _  __          _                         _
 | |/ /___ _   _| |__   ___   __ _ _ __ __| |
@@ -855,6 +935,12 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
     exports.Set(Napi::String::New(env, "captureScreen"), Napi::Function::New(env, _captureScreen));
     exports.Set(Napi::String::New(env, "getXDisplayName"), Napi::Function::New(env, _getXDisplayName));
     exports.Set(Napi::String::New(env, "setXDisplayName"), Napi::Function::New(env, _setXDisplayName));
+
+#if defined(USE_X11)
+    exports.Set(Napi::String::New(env, "moveMouseOnDisplay"), Napi::Function::New(env, _moveMouseOnDisplay));
+    exports.Set(Napi::String::New(env, "toggleMouseOnDisplay"), Napi::Function::New(env, _toggleMouseOnDisplay));
+    exports.Set(Napi::String::New(env, "clickMouseOnDisplay"), Napi::Function::New(env, _clickMouseOnDisplay));
+#endif
 
     return exports;
 }
