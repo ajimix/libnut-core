@@ -8,7 +8,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        os: [ ubuntu-20.04, macos-11, windows-2019 ]
+        os: [ ubuntu-22.04, macos-13 ]
         node: [ 18 ]
     runs-on: ${{matrix.os}}
     steps:
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: ${{matrix.node}}
       - name: Configure Linux environment
-        if: ${{matrix.os == 'ubuntu-20.04'}}
+        if: ${{matrix.os == 'ubuntu-22.04'}}
         run: sudo apt-get install -y cmake libx11-dev zlib1g-dev libpng-dev libxtst-dev build-essential
       - name: Install
         run: npm run patch && npm i
